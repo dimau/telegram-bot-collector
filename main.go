@@ -90,8 +90,19 @@ func main() {
 	defer listener.Close()
 
 	for update := range listener.Updates {
-		if update.GetClass() == client.ClassUpdate {
-			log.Printf("%#v", update)
+
+		// We are handling only updates with new messages
+		if update.GetType() != "updateNewMessage" {
+			continue
 		}
+
+		// Get the content of the message and check that it's a text message
+		content := update.(*client.UpdateNewMessage).Message.Content
+		if content.MessageContentType() != "messageText" {
+			continue
+		}
+
+		log.Printf("Message: %#v", update.(*client.UpdateNewMessage).Message.Content.(*client.MessageText).Text.Text)
+		log.Printf("Text Entities: %#v", update.(*client.UpdateNewMessage).Message.Content.(*client.MessageText).Text.Entities)
 	}
 }
